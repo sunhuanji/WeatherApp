@@ -8,6 +8,7 @@
 
 import UIKit
 import Alamofire
+import SwiftyJSON
 
 class ForeCast {
     var _date:String!
@@ -43,31 +44,22 @@ class ForeCast {
         return _lowTemp
     }
     
-    init(weatherDict:Dictionary<String, AnyObject>){
-        if let temp = weatherDict["temp"] as? Dictionary<String, AnyObject>{
-            if let min = temp["min"] as? Double{
-             let SheShiMin = min - 273.15
-                self._lowTemp = SheShiMin
-            }
-            if let max = temp["max"] as? Double{
-             let SheShiMax = max - 273.15
-                self._highTemp = SheShiMax
-            }
-        }
-        if let weather = weatherDict["weather"] as? [Dictionary<String, AnyObject>]{
-            if let main = weather[0]["main"] as? String{
-              self._weatherType = main
-            }
-        }
-        
-        if let date = weatherDict["dt"] as? Double{
-          let unixConverteDate = Date(timeIntervalSince1970: date)
-          let dateFormatter = DateFormatter()
-            dateFormatter.dateStyle = .full
-            dateFormatter.dateFormat = "EEEE"
-            dateFormatter.timeStyle = .none
-            self._date = unixConverteDate.dayOfTheWeek()
-        }
+    init(weatherDict:JSON){
+        let min = weatherDict["temp"]["min"].double
+        let SheShiMin = min! - 273.15
+        let max = weatherDict["temp"]["max"].double
+        let SheShiMax = max! - 273.15
+        let main = weatherDict["weather"][0]["main"].string
+        let date = weatherDict["dt"].double
+        self._lowTemp = SheShiMin
+        self._highTemp = SheShiMax
+        self._weatherType = main
+        let unixConverteDate = Date(timeIntervalSince1970: date!)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .full
+        dateFormatter.dateFormat = "EEEE"
+        dateFormatter.timeStyle = .none
+        self._date = unixConverteDate.dayOfTheWeek()
     }
 }
 

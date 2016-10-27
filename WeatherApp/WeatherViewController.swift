@@ -9,6 +9,7 @@
 import UIKit
 import Alamofire
 import CoreLocation
+import SwiftyJSON
 
 class WeatherViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var dateLebal: UILabel!
@@ -95,23 +96,19 @@ class WeatherViewController: UIViewController, UITableViewDataSource, UITableVie
     }
     
     func downloadForecastData(completed:@escaping DownloadComplete){
-        //download data for tableView
-        Alamofire.request(FORECAST_URL).responseJSON{ response in
-            let result = response.result
-            
-            if let dict = result.value as? Dictionary<String, AnyObject>{
-                if let list = dict["list"] as? [Dictionary<String, AnyObject>]{
-                    for obj in list {
-                        let forecast = ForeCast(weatherDict: obj)
-                        self.forcasts.append(forecast)
-                    }
-                    self.forcasts.remove(at: 0)
-                    self.tableView.reloadData()
+        Alamofire.request(FORECAST_URL).responseJSON { response in
+            if let values = response.result.value{
+                let json = JSON(values)
+                let list = json["list"].array
+                for obj in list! {
+                    let forecast = ForeCast(weatherDict: obj)
+                    self.forcasts.append(forecast)
                 }
+                self.forcasts.remove(at: 0)
+                self.tableView.reloadData()
             }
             completed()
         }
-        
     }
 
 }
